@@ -9,7 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->decimal('delivery_charges', 10, 2)->default(0)->after('cod_amount');
+            // Prevent duplicate-column error if table already has this column
+            if (!Schema::hasColumn('bookings', 'delivery_charges')) {
+                $table->decimal('delivery_charges', 10, 2)->default(0)->after('cod_amount');
+            }
         });
     }
 

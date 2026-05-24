@@ -8,19 +8,25 @@ use App\Filament\Resources\CourierIntegrations\Pages\ListCourierIntegrations;
 use App\Filament\Resources\CourierIntegrations\Schemas\CourierIntegrationForm;
 use App\Filament\Resources\CourierIntegrations\Tables\CourierIntegrationsTable;
 use App\Models\CourierIntegration;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class CourierIntegrationResource extends Resource
 {
     protected static ?string $model = CourierIntegration::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $recordTitleAttribute = 'courier_name';
 
-    protected static ?string $recordTitleAttribute = 'TCS';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-cpu-chip';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Courier Management';
+    }
 
     public static function form(Schema $schema): Schema
     {

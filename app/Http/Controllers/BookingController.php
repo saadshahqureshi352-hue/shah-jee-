@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\FiltersBookings;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
+    use FiltersBookings;
     public const COURIERS = [
         'trax' => [
             'name' => 'Trax',
@@ -295,24 +297,40 @@ class BookingController extends Controller
     }
 
     // =========================================================================
-    // === BULK PRINT SYSTEM METHODS ===
+    // === LOAD SHEET SYSTEM METHODS ===
     // =========================================================================
 
-    // Modal ke andar database se filtered data load karne ke liye
-    public function getBulkOrders(Request $request) 
+    // Load Sheet modal ke andar database se filtered data load karne ke liye (courier-specific)
+    public function getLoadSheetOrders(Request $request)
     {
-        // Security Check: Sirf current logged-in user ke apne 'pending' bookings aayein
+        $courierSlug = $request->get('courier');
+        if (!$courierSlug || !isset(self::COURIERS[$courierSlug])) {
+            return response()->json(['orders' => []]);
+        }
+
+        $courierName = self::COURIERS[$courierSlug]['name'];
+        $integrationId = $this->resolveCourierIntegrationId($courierName);
+
         $query = DB::table('bookings')
             ->where('user_id', auth()->id())
-            ->where('status', 'pending');
+            ->where('status', 'pending')
+            ->where('courier_integration_id', $integrationId);
 
-        if ($request->has('search') && !empty($request->search)) {
+        // Apply date range filter
+        $dateRange = $request->get('date_range', 'today');
+        $this->applyBulkDateRange($query, $dateRange);
+
+        // Apply search filter from frontend
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('id', 'LIKE', "%{$search}%")
-                  ->orWhere('customer_name', 'LIKE', "%{$search}%")
-                  ->orWhere('destination_city', 'LIKE', "%{$search}%")
-                  ->orWhere('tracking_number', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $term = "%{$search}%";
+                $q->where('tracking_number', 'LIKE', $term)
+                    ->orWhere('customer_name', 'LIKE', $term)
+                    ->orWhere('customer_phone', 'LIKE', $term)
+                    ->orWhere('destination_city', 'LIKE', $term)
+                    ->orWhere('reference_no', 'LIKE', $term)
+                    ->orWhere('consignee_address', 'LIKE', $term);
             });
         }
 
@@ -321,22 +339,72 @@ class BookingController extends Controller
         return response()->json(['orders' => $orders]);
     }
 
+    // =========================================================================
+    // === BULK PRINT SYSTEM METHODS ===
+    // =========================================================================
+
+    // Modal ke andar database se filtered data load karne ke liye
+    public function getBulkOrders(Request $request)
+    {
+        $query = DB::table('bookings')
+            ->where('user_id', auth()->id())
+            ->where('status', 'pending');
+
+        // Apply date range filter (same logic as main bookings page)
+        $dateRange = $request->get('date_range', 'all_time');
+        $this->applyBulkDateRange($query, $dateRange);
+
+        // Apply search filter from frontend
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $term = "%{$search}%";
+                $q->where('tracking_number', 'LIKE', $term)
+                    ->orWhere('customer_name', 'LIKE', $term)
+                    ->orWhere('customer_phone', 'LIKE', $term)
+                    ->orWhere('destination_city', 'LIKE', $term)
+                    ->orWhere('reference_no', 'LIKE', $term)
+                    ->orWhere('consignee_address', 'LIKE', $term);
+            });
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json(['orders' => $orders]);
+    }
+
+    /**
+     * Apply date range specifically for the bulk print modal.
+     */
+    private function applyBulkDateRange($query, string $range): void
+    {
+        $now = now();
+
+        match ($range) {
+            'today' => $query->whereDate('created_at', $now->toDateString()),
+            'yesterday' => $query->whereDate('created_at', $now->copy()->subDay()->toDateString()),
+            'last_7' => $query->where('created_at', '>=', $now->copy()->subDays(7)),
+            'last_30' => $query->where('created_at', '>=', $now->copy()->subDays(30)),
+            'all_time' => null, // No filter = all pending orders
+            default => $query->where('created_at', '>=', $now->copy()->subDays(60)),
+        };
+    }
+
     // Multiples labels ko akatha ek hi page par print karne ka layout
-    public function bulkPrintLabels(Request $request) 
+    public function bulkPrintLabels(Request $request)
     {
         if (!$request->has('ids') || empty($request->query('ids'))) {
             abort(400, 'No order IDs provided for bulk printing.');
         }
 
         $ids = explode(',', $request->query('ids'));
-        
-        // Database se un sabhi selected IDs ka data uthayein (aur confirm karein ke yeh isi user ki hain)
+
         $bookings = DB::table('bookings')
             ->whereIn('id', $ids)
             ->where('user_id', auth()->id())
             ->get();
-        
-        // Ek clean simple layout return karein jo automatically print command trigger kare
+
         return view('bookings.bulk_slips_print', compact('bookings'));
     }
 }
+

@@ -42,10 +42,31 @@ Route::get('/force-admin-login', function () {
 });
 // ============================================
 
-Route::get('/track/{tracking_number}', [TrackingPublicController::class, 'show'])->name('track.show');
+// === OTP Password Reset Routes ===
+use App\Http\Controllers\Auth\OtpPasswordResetController;
 
-// Protected Routes
+Route::get('/forgot-password', [OtpPasswordResetController::class, 'showForgotForm'])->name('otp.forgot.form');
+Route::post('/forgot-password/send-otp', [OtpPasswordResetController::class, 'sendOtp'])->name('otp.send');
+Route::get('/verify-otp', [OtpPasswordResetController::class, 'showOtpForm'])->name('otp.verify.form');
+Route::post('/verify-otp', [OtpPasswordResetController::class, 'verifyOtp'])->name('otp.verify');
+Route::post('/resend-otp', [OtpPasswordResetController::class, 'resendOtp'])->name('otp.resend');
+Route::get('/reset-password', [OtpPasswordResetController::class, 'showResetForm'])->name('otp.reset.form');
+Route::post('/reset-password', [OtpPasswordResetController::class, 'resetPassword'])->name('otp.reset');
+// ===================================
+
+Route::get('/track', [TrackingPublicController::class, 'show'])->name('track.show');
+Route::get('/track/{tracking_number}', [TrackingPublicController::class, 'show'])->name('track.show.seo');
+Route::get('/track/api/{tracking_number}', [TrackingPublicController::class, 'api'])->name('track.api');
+
+// === BOOKING CANCEL, EDIT, EXPORT ROUTES ===
+use App\Http\Controllers\BookingCancelController;
+
 Route::middleware(['auth'])->group(function () {
+    Route::post('/bookings/{booking}/cancel', [BookingCancelController::class, 'cancel'])->name('bookings.cancel');
+    Route::get('/bookings/{booking}/edit', [BookingCancelController::class, 'edit'])->name('bookings.edit');
+    Route::post('/bookings/{booking}/update', [BookingCancelController::class, 'update'])->name('bookings.update');
+    Route::get('/export/excel', [BookingCancelController::class, 'exportExcel'])->name('bookings.export.excel');
+    Route::get('/export/pdf', [BookingCancelController::class, 'exportPdf'])->name('bookings.export.pdf');
 
     Route::get('/dashboard', [BookingController::class, 'index'])->name('dashboard');
 
@@ -64,15 +85,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/book-shipment', [BookingController::class, 'store'])->name('shipment.book');
     Route::get('/bookings/{booking}/slip', [BookingController::class, 'slip'])->name('bookings.slip');
 
+    // === LOAD SHEET SYSTEM ROUTES ===
+    Route::get('/api/load-sheet-orders', [BookingController::class, 'getLoadSheetOrders']);
+    // =================================
+
     // === BULK PRINT LABELS SYSTEM ROUTES ===
-    // Modal ka data lane ke liye endpoint
     Route::get('/api/bulk-print-orders', [BookingController::class, 'getBulkOrders']);
-    // Selected orders ko akatha print nikalne ka generator
     Route::get('/bookings/bulk-print', [BookingController::class, 'bulkPrintLabels'])->name('bookings.bulk-print');
     // =======================================
 
+    // === PICKUP ADDRESSES SYSTEM ROUTES ===
     Route::get('/pickup-addresses', [PickupAddressController::class, 'index'])->name('pickup-addresses.index');
     Route::post('/pickup-addresses', [PickupAddressController::class, 'store'])->name('pickup-addresses.store');
+    Route::get('/pickup-addresses/{id}/edit', [PickupAddressController::class, 'edit'])->name('pickup-addresses.edit');
+    Route::put('/pickup-addresses/{id}', [PickupAddressController::class, 'update'])->name('pickup-addresses.update');
+    Route::delete('/pickup-addresses/{id}', [PickupAddressController::class, 'destroy'])->name('pickup-addresses.destroy');
+    // =======================================
 
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 

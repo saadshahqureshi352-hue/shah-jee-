@@ -16,10 +16,13 @@ return new class extends Migration
             $table->string('service_type')->default('Regular')->after('status');
         });
 
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM(
-            'pending', 'dispatched', 'in_transit', 'out_for_delivery',
-            'delivered', 'returned', 'cancelled', 'lost'
-        ) NOT NULL DEFAULT 'pending'");
+        // SQLite (and some MySQL modes) do not support `ALTER TABLE ... MODIFY COLUMN`
+        // The status column was already created in the bookings base migration.
+        // If you need to extend status values, do it via a new migration compatible with SQLite.
+        // DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM(
+        //     'pending', 'dispatched', 'in_transit', 'out_for_delivery',
+        //     'delivered', 'returned', 'cancelled', 'lost'
+        // ) NOT NULL DEFAULT 'pending'");
 
         foreach (DB::table('bookings')->whereNull('tracking_number')->pluck('id') as $id) {
             DB::table('bookings')->where('id', $id)->update([

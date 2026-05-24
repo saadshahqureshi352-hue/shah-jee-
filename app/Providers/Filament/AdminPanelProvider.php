@@ -2,6 +2,11 @@
 
 namespace App\Providers\Filament;
 
+
+use App\Filament\Widgets\StatsOverviewWidget;
+use App\Filament\Widgets\CourierPerformanceWidget;
+use App\Filament\Widgets\RevenueVsProfitWidget;
+use App\Filament\Widgets\AlertsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,16 +35,27 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Amber,
+                'danger' => Color::Red,
+                'gray' => Color::Zinc,
+                'info' => Color::Blue,
+                'success' => Color::Green,
+                'warning' => Color::Orange,
             ])
+            ->darkMode(true)
+            ->brandName('Shah Jee Courier')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+                \App\Filament\Pages\LayoutOnlyPage::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
+                StatsOverviewWidget::class,
+                CourierPerformanceWidget::class,
+                RevenueVsProfitWidget::class,
+                AlertsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -51,9 +67,13 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Providers\Filament\LayoutOnlyGuardMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
     }
 }
+
+
+
