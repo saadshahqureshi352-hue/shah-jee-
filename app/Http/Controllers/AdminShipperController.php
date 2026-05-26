@@ -17,7 +17,7 @@ class AdminShipperController extends Controller
         $search = trim((string) $request->get('search', ''));
         $status = (string) $request->get('status', 'all');
 
-        $query = User::query()->orderByDesc('created_at');
+        $query = User::query()->where('role', 'shipper')->orderByDesc('created_at');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {

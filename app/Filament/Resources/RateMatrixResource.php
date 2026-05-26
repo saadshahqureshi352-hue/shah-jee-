@@ -3,23 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Models\RateMatrix;
-use Filament\Resources\Resource;
-
-use Filament\Tables\Table;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Toggle;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Section;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Notifications\Notification;
+use Filament\Tables\Table;
 
 class RateMatrixResource extends Resource
 {
@@ -37,10 +34,40 @@ class RateMatrixResource extends Resource
         return 'Courier Management';
     }
 
-    // form() override removed because Filament\Forms\Form is not available in this runtime.
-
-
-    // (original schema removed)
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Rate Details')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('courier_integration_id')
+                            ->label('Courier')
+                            ->relationship('courierIntegration', 'courier_name')
+                            ->searchable()
+                            ->required(),
+                        Select::make('city_zone')
+                            ->label('City Zone')
+                            ->options([
+                                'local' => 'Local',
+                                'regional' => 'Regional',
+                                'national' => 'National',
+                            ])
+                            ->required(),
+                        TextInput::make('weight_category')
+                            ->label('Weight Category')
+                            ->required()
+                            ->maxLength(50),
+                        TextInput::make('rate')
+                            ->label('Rate (PKR)')
+                            ->numeric()
+                            ->required(),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true),
+                    ]),
+            ]);
+    }
 
     public static function table(Table $table): Table
     {
@@ -90,10 +117,10 @@ class RateMatrixResource extends Resource
                         '0' => 'Inactive',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     BulkAction::make('exportToExcel')
                         ->label('Export to Excel')

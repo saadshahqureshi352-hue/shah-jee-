@@ -1,30 +1,29 @@
 <?php
 
-
 namespace App\Filament\Resources;
 
 use App\Models\Booking;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\TableViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class BookingResource extends Resource
 {
@@ -46,9 +45,123 @@ class BookingResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Shipments';
 
-    // Temporarily omit form() override.
-    // The runtime error indicates Filament\Forms\Form is not available in this environment.
-    // Table + actions can still work.
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Shipment Details')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('user_id')
+                            ->label('Merchant')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->required(),
+                        Select::make('courier_integration_id')
+                            ->label('Courier')
+                            ->relationship('courier_integration', 'courier_name')
+                            ->searchable()
+                            ->required(),
+                        TextInput::make('consignment_no')
+                            ->label('Consignment #')
+                            ->required()
+                            ->maxLength(50),
+                        TextInput::make('tracking_number')
+                            ->label('Tracking #')
+                            ->maxLength(50),
+                        TextInput::make('reference_no')
+                            ->label('Reference #')
+                            ->maxLength(50),
+                        Select::make('status')
+                            ->options([
+                                'pending' => 'Pending',
+                                'picked_up' => 'Picked Up',
+                                'dispatched' => 'Dispatched',
+                                'in_transit' => 'In Transit',
+                                'out_for_delivery' => 'Out for Delivery',
+                                'delivered' => 'Delivered',
+                                'returned' => 'Returned',
+                                'cancelled' => 'Cancelled',
+                            ])
+                            ->default('pending')
+                            ->required(),
+                        Select::make('service_type')
+                            ->options([
+                                'standard' => 'Standard',
+                                'express' => 'Express',
+                                'overnight' => 'Overnight',
+                                'same_day' => 'Same Day',
+                            ])
+                            ->default('standard'),
+                        Toggle::make('is_cod')
+                            ->label('Cash on Delivery')
+                            ->default(true),
+                    ]),
+                Section::make('Customer Information')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('customer_name')
+                            ->required()
+                            ->maxLength(100),
+                        TextInput::make('customer_phone')
+                            ->tel()
+                            ->required()
+                            ->maxLength(20),
+                        TextInput::make('second_phone')
+                            ->tel()
+                            ->maxLength(20),
+                        TextInput::make('customer_address')
+                            ->label('Address')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('consignee_address')
+                            ->label('Consignee Address')
+                            ->maxLength(255),
+                        TextInput::make('destination_city')
+                            ->label('Destination City')
+                            ->required()
+                            ->maxLength(50),
+                        TextInput::make('origin_city')
+                            ->label('Origin City')
+                            ->maxLength(50),
+                    ]),
+                Section::make('Package & Charges')
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('weight')
+                            ->numeric()
+                            ->suffix('kg')
+                            ->default(0)
+                            ->required(),
+                        TextInput::make('quantity')
+                            ->numeric()
+                            ->default(1),
+                        TextInput::make('product_name')
+                            ->maxLength(100),
+                        TextInput::make('cod_amount')
+                            ->label('COD Amount (PKR)')
+                            ->numeric()
+                            ->default(0)
+                            ->required(),
+                        TextInput::make('delivery_charges')
+                            ->label('Delivery Charges (PKR)')
+                            ->numeric()
+                            ->default(0)
+                            ->required(),
+                        DatePicker::make('pickup_date')
+                            ->label('Pickup Date'),
+                        Textarea::make('description')
+                            ->columnSpan(2)
+                            ->rows(2),
+                        Textarea::make('special_instructions')
+                            ->columnSpan(2)
+                            ->rows(2),
+                        Textarea::make('remarks')
+                            ->columnSpan(2)
+                            ->rows(2),
+                    ]),
+            ]);
+    }
 
     public static function table(Table $table): Table
     {
@@ -175,7 +288,7 @@ class BookingResource extends Resource
                     }),
             ])
             ->defaultSort('created_at', 'desc')
-            ->actions([
+            ->recordActions([
                 Action::make('view_tracking')
                     ->label('Track')
                     ->icon('heroicon-o-map-pin')
@@ -241,7 +354,7 @@ class BookingResource extends Resource
                             ->send();
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     BulkAction::make('bulk_status_update')
                         ->label('Change Status')
@@ -310,4 +423,3 @@ class BookingResource extends Resource
         ];
     }
 }
-

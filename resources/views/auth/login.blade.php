@@ -29,7 +29,7 @@
                         <div class="relative h-28 w-28 flex items-center justify-center">
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 blur-xl opacity-45 animate-pulse"></div>
                             <div class="relative h-24 w-24 bg-white p-2 rounded-2xl ring-4 ring-white shadow-2xl overflow-hidden flex items-center justify-center transition-transform duration-300 hover:scale-105">
-                                <img src="{{ asset('images/shah-jee-logo.png') }}" alt="Shah Jee Courier" class="max-h-full max-w-full h-auto w-auto object-contain">
+                                <img src="{{ asset('images/logo.png') }}" alt="Shah Jee Courier" class="max-h-full max-w-full h-auto w-auto object-contain">
                             </div>
                         </div>
                     </div>

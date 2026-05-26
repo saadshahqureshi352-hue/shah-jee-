@@ -2,80 +2,56 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Booking;
-use App\Models\User;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
-class AlertsWidget extends BaseWidget
+class AlertsWidget extends Widget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
+    protected string $view = 'filament.widgets.alerts-widget';
+    protected int | string | array $columnSpan = 'full';
 
-    protected ?string $pollingInterval = '60s';
-
-    protected function getStats(): array
+    public function getAlerts(): array
     {
-        // Pending pickup requests (bookings with status 'pending' and no pickup date)
-        $pendingPickups = Booking::where('status', 'pending')
-            ->whereNull('pickup_date')
-            ->count();
+        $alerts = [];
 
-        // Delayed shipments (dispatched but not delivered within 48 hours)
-        $delayedShipments = Booking::whereIn('status', ['dispatched', 'in_transit'])
-            ->where('created_at', '<', now()->subHours(48))
-            ->count();
+        // Pending orders
+        $pending = DB::table('bookings')->where('status', 'pending')->count();
+        if ($pending > 0) {
+            $alerts[] = [
+                'type'    => 'danger',
+                'message' => $pending . ' orders pending pickup hain — schedule nahi hua',
+                'icon'    => 'heroicon-o-clock',
+            ];
+        }
 
-        // Returned shipments today
-        $returnedToday = Booking::where('status', 'returned')
-            ->whereDate('updated_at', today())
-            ->count();
+        // Low wallet merchants - agar aapke paas wallets table hai
+        try {
+            $lowWallets = DB::table('users')
+                ->where('wallet_balance', '<', 1000)
+                ->where('status', 'active')
+                ->get();
 
-        // Pending merchant approvals
-        $pendingMerchants = User::where('is_approved', false)
-            ->where('id', '!=', 1)
-            ->count();
+            foreach ($lowWallets as $user) {
+                $alerts[] = [
+                    'type'    => 'warning',
+                    'message' => '"' . $user->name . '" ka wallet low hai — Rs ' . $user->wallet_balance,
+                    'icon'    => 'heroicon-o-exclamation-triangle',
+                ];
+            }
+        } catch (\Exception $e) {
+            // wallet_balance column nahi hai to skip
+        }
 
-        // High-value COD shipments pending delivery
-        $highValuePending = Booking::whereNotIn('status', ['delivered', 'returned', 'cancelled'])
-            ->where('cod_amount', '>', 50000)
-            ->count();
+        if (count($alerts) === 0) {
+            $alerts[] = [
+                'type'    => 'success',
+                'message' => 'Sab theek hai — koi alert nahi!',
+                'icon'    => 'heroicon-o-check-circle',
+            ];
+        }
 
-        // Discrepancies in COD reconciliation
-        $codDiscrepancies = \App\Models\CODReconciliation::where('status', 'discrepancy')->count();
-
-        $totalAlerts = $pendingPickups + $delayedShipments + $pendingMerchants + $codDiscrepancies;
-        $criticalAlerts = $delayedShipments + $codDiscrepancies;
-
-        return [
-            Stat::make('🚨 Total Alerts', $totalAlerts)
-                ->description($criticalAlerts > 0 ? $criticalAlerts . ' require immediate attention' : 'All systems normal')
-                ->descriptionIcon($criticalAlerts > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-check-circle')
-                ->color($criticalAlerts > 0 ? 'danger' : 'success'),
-
-            Stat::make('📦 Pending Pickups', $pendingPickups)
-                ->description('Awaiting courier pickup')
-                ->descriptionIcon('heroicon-m-clock')
-                ->color($pendingPickups > 0 ? 'warning' : 'success'),
-
-            Stat::make('⏱️ Delayed Shipments', $delayedShipments)
-                ->description('Over 48 hours in transit')
-                ->descriptionIcon('heroicon-m-exclamation-circle')
-                ->color($delayedShipments > 0 ? 'danger' : 'success'),
-
-            Stat::make('🔄 Returned Today', $returnedToday)
-                ->description('Shipments returned today')
-                ->descriptionIcon('heroicon-m-arrow-uturn-left')
-                ->color($returnedToday > 0 ? 'warning' : 'success'),
-
-            Stat::make('👤 Pending Approvals', $pendingMerchants)
-                ->description('Merchants awaiting verification')
-                ->descriptionIcon('heroicon-m-user-plus')
-                ->color($pendingMerchants > 0 ? 'warning' : 'success'),
-
-            Stat::make('💰 High-Value Pending', $highValuePending)
-                ->description('Shipments > PKR 50,000 not delivered')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color($highValuePending > 0 ? 'danger' : 'success'),
-        ];
+        return $alerts;
     }
 }

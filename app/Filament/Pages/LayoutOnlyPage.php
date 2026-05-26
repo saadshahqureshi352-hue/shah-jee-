@@ -8,7 +8,7 @@ class LayoutOnlyPage extends Page
 {
 
 
-    // protected static string $view = 'filament.layout-only';
+    protected static bool $shouldRegisterNavigation = false;
 
 
 

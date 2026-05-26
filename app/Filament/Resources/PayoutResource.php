@@ -29,7 +29,7 @@ class PayoutResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Financial Management';
+        return 'Financials';
     }
 
     public static function form(Schema $schema): Schema

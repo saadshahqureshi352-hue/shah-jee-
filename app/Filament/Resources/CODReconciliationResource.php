@@ -30,7 +30,7 @@ class CODReconciliationResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Financial Management';
+        return 'Financials';
     }
 
     public static function form(Schema $schema): Schema
@@ -124,6 +124,11 @@ class CODReconciliationResource extends Resource
             ])
             ->bulkActions([
                 \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\BulkAction::make('exportToExcel')
+                        ->label('Export to Excel')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(fn ($records) => \App\Services\ExportService::export($records, 'cod-reconciliation')),
                     \Filament\Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,9 +20,10 @@ use Illuminate\Notifications\Notifiable;
     'iban_number', 'bank_name', 'payment_cycle', 'cheque_photo_path', 'profile_photo_path',
     'selfie_photo_path', 'cnic_front_path', 'cnic_back_path', 'business_photo_paths', 'home_address',
     'cnic_or_passport', 'date_of_birth', 'gender', 'is_approved', 'approved_at', 'has_seen_welcome', 'is_profile_locked',
+    'pricing_plan_id', 'role', 'wallet_balance', 'wallet_blocked', 'account_status',
 ])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable;
 
@@ -28,14 +31,19 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'approved_at' => 'datetime',
-            'date_of_birth' => 'date',
-            'is_approved' => 'boolean',
-            'has_seen_welcome' => 'boolean',
+            'password'          => 'hashed',
+            'approved_at'       => 'datetime',
+            'date_of_birth'     => 'date',
+            'is_approved'       => 'boolean',
+            'has_seen_welcome'  => 'boolean',
             'is_profile_locked' => 'boolean',
             'business_photo_paths' => 'array',
         ];
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin();
     }
 
     public function isAdmin(): bool

@@ -1,0 +1,11 @@
+
+  GET|HEAD       admin/admin-dashboard ........ filament.admin.pages.admin-dashboard › App\Filament\Pages\AdminDashboard
+  GET|HEAD       admin/finance-overview .......... filament.admin.pages.finance-overview › App\Filament\Pages\Financials
+  GET|HEAD       admin/layout-only ................ filament.admin.pages.layout-only › App\Filament\Pages\LayoutOnlyPage
+  GET|HEAD       admin/plan-management .......... filament.admin.pages.plan-management › App\Filament\Pages\PricingPlans
+  GET|HEAD       admin/shipment-management filament.admin.pages.shipment-management › App\Filament\Pages\ShipmentManage…
+  GET|HEAD       admin/shipper-management filament.admin.pages.shipper-management › App\Filament\Pages\ShipperManagement
+  GET|HEAD       admin/system-settings ........ filament.admin.pages.system-settings › App\Filament\Pages\SystemSettings
+
+                                                                                                      Showing [7] routes
+

@@ -3,23 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Models\Wallet;
-use Filament\Resources\Resource;
-
-use Filament\Tables\Table;
-use Filament\Forms\Components\TextInput;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Notifications\Notification;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Table;
 use App\Filament\Resources\WalletResource\Pages\ListWallets;
 
 class WalletResource extends Resource
@@ -35,15 +33,37 @@ class WalletResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Merchant Management';
+        return 'Merchant & User Management';
     }
 
-
-
-    // Form() is disabled in this runtime.
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Wallet Details')
+                    ->schema([
+                        Select::make('user_id')
+                            ->label('Merchant')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->required(),
+                        TextInput::make('balance')
+                            ->label('Balance (PKR)')
+                            ->numeric()
+                            ->default(0),
+                        Select::make('status')
+                            ->options([
+                                'active' => 'Active',
+                                'blocked' => 'Blocked',
+                                'suspended' => 'Suspended',
+                            ])
+                            ->default('active')
+                            ->required(),
+                    ]),
+            ]);
+    }
 
     public static function table(Table $table): Table
-
     {
         return $table
             ->columns([
@@ -92,7 +112,7 @@ class WalletResource extends Resource
                         'suspended' => 'Suspended',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 Action::make('updateBalance')
                     ->label('Update Balance')
@@ -163,7 +183,7 @@ class WalletResource extends Resource
                     })
                     ->requiresConfirmation(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     BulkAction::make('exportToExcel')
                         ->label('Export to Excel')

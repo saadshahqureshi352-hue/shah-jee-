@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MerchantResource\Pages;
 
 use App\Filament\Resources\MerchantResource\MerchantResource;
+use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditMerchant extends EditRecord
@@ -12,7 +13,7 @@ class EditMerchant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\DeleteAction::make(),
+            Actions\DeleteAction::make(),
         ];
     }
 }

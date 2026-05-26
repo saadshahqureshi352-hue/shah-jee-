@@ -2,37 +2,72 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Booking;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CourierPerformanceWidget extends ChartWidget
 {
+    protected ?string $heading = 'Courier Performance — Aaj';
     protected static ?int $sort = 2;
-    protected ?string $heading = 'Courier Performance (Deliveries)';
+    protected ?string $maxHeight = '250px';
+
 
     protected function getData(): array
     {
-        $data = Booking::select('courier_integrations.courier_name', DB::raw('count(*) as total'))
-            ->join('courier_integrations', 'bookings.courier_integration_id', '=', 'courier_integrations.id')
-            ->where('bookings.status', 'delivered')
-            ->groupBy('courier_integrations.courier_name')
-            ->pluck('total', 'courier_name');
+        // couriers table se data
+        try {
+            $couriers = DB::table('courier_services')->get();
+        } catch (\Exception $e) {
+            $couriers = collect();
+        }
+
+        $labels    = [];
+        $delivered = [];
+        $returned  = [];
+
+        foreach ($couriers as $courier) {
+            $labels[] = $courier->name;
+
+            $delivered[] = DB::table('bookings')
+                ->where('courier_id', $courier->id)
+                ->whereDate('created_at', Carbon::today())
+                ->where('status', 'delivered')
+                ->count();
+
+            $returned[] = DB::table('orders')
+                ->where('courier_id', $courier->id)
+                ->whereDate('created_at', Carbon::today())
+                ->where('status', 'returned')
+                ->count();
+        }
+
+        // Agar couriers table nahi hai
+        if (count($labels) === 0) {
+            $labels    = ['Trax', 'Leopards', 'TCS', 'M&P'];
+            $delivered = [0, 0, 0, 0];
+            $returned  = [0, 0, 0, 0];
+        }
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Deliveries',
-                    'data' => $data->values()->toArray(),
-                    'backgroundColor' => ['#36A2EB', '#FF6384', '#4BC0C0', '#FF9F40', '#9966FF'],
+                    'label'           => 'Delivered',
+                    'data'            => $delivered,
+                    'backgroundColor' => '#10b981',
+                ],
+                [
+                    'label'           => 'Returned',
+                    'data'            => $returned,
+                    'backgroundColor' => '#ef4444',
                 ],
             ],
-            'labels' => $data->keys()->toArray(),
+            'labels' => $labels,
         ];
     }
 
     protected function getType(): string
     {
-        return 'doughnut';
+        return 'bar';
     }
 }

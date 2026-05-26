@@ -31,7 +31,7 @@ class ActivityLogResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'System';
+        return 'Reports & Logs';
     }
 
     protected static ?string $slug = 'activity-logs';

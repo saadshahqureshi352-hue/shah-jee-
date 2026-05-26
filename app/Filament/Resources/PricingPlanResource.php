@@ -3,14 +3,18 @@
 namespace App\Filament\Resources;
 
 use App\Models\PricingPlan;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class PricingPlanResource extends Resource
 {
@@ -18,9 +22,56 @@ class PricingPlanResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    // NOTE: navigation icon/group + form() override intentionally removed because
-    // Filament\Forms\Form (and some Resource static type checks) are not available
-    // in this runtime environment.
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-tag';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Merchant & User Management';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Plan Details')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Plan Name')
+                            ->required()
+                            ->maxLength(100),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true),
+                    ]),
+                Section::make('Charges & Rates')
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('base_delivery_charge')
+                            ->label('Base Delivery Charge (PKR)')
+                            ->numeric()
+                            ->default(0)
+                            ->required(),
+                        TextInput::make('cod_commission_percent')
+                            ->label('COD Commission (%)')
+                            ->numeric()
+                            ->default(0)
+                            ->suffix('%'),
+                        TextInput::make('weight_charge_per_kg')
+                            ->label('Per Kg Charge (PKR)')
+                            ->numeric()
+                            ->default(0),
+                        TextInput::make('fuel_surcharge_percent')
+                            ->label('Fuel Surcharge (%)')
+                            ->numeric()
+                            ->default(0)
+                            ->suffix('%'),
+                    ]),
+            ]);
+    }
 
     public static function table(Table $table): Table
     {
@@ -55,10 +106,10 @@ class PricingPlanResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     BulkAction::make('exportToExcel')
                         ->label('Export to Excel')
@@ -78,4 +129,3 @@ class PricingPlanResource extends Resource
         ];
     }
 }
-

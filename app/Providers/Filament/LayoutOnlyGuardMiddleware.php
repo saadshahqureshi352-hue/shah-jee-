@@ -9,15 +9,23 @@ class LayoutOnlyGuardMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // If layout-only mode is enabled, prevent any DB-backed logic by short-circuiting.
-        // Filament will still render its layout (HTML) but we stop execution that would hit DB.
-        if (filter_var(env('FILAMENT_LAYOUT_ONLY', false), FILTER_VALIDATE_BOOL)) {
-            return redirect()->to(
-                \Filament\Pages\Page::getUrl('layout-only')
-            );
+        if (!config('filament_layout_only.enabled', false)) {
+            return $next($request);
         }
 
-        return $next($request);
+        $path = trim($request->path(), '/');
+
+        // Allow authentication routes to function (login, password reset, logout)
+        if (str_contains($path, 'login') || str_contains($path, 'password') || str_contains($path, 'logout')) {
+            return $next($request);
+        }
+
+        // Allow Livewire & asset requests through so the panel loads
+        if (str_contains($path, 'livewire') || str_contains($path, 'css') || str_contains($path, 'js')) {
+            return $next($request);
+        }
+
+        // Serve the layout-only placeholder view for all other requests
+        return response()->view('filament.layout-only');
     }
 }
-
