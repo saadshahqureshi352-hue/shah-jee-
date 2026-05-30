@@ -26,7 +26,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+
 
         $user = $request->user();
         if ($user && ! $user->has_seen_welcome) {
