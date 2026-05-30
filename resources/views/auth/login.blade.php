@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen antialiased overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0d9488 100%);">
-    <div class="relative flex items-center justify-center min-h-screen w-full overflow-hidden p-4">
+    <div class="relative flex flex-col md:flex-row items-center justify-center md:justify-between min-h-screen w-full overflow-hidden p-4 md:p-12 gap-8">
         <div class="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 opacity-15 blur-3xl animate-pulse"></div>
         <div class="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 opacity-15 blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
         <div class="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 opacity-10 blur-3xl float"></div>
@@ -21,10 +21,9 @@
             <div class="absolute top-1/2 right-1/3 h-2 w-2 rounded-full bg-blue-400 opacity-50 float" style="animation-delay: 2s;"></div>
         </div>
 
-        <div class="w-full max-w-lg scale-in max-h-[92vh] overflow-auto">
+        <div class="w-full md:w-[38%] max-w-lg scale-in max-h-[92vh] overflow-auto z-10 md:ml-16">
             <div class="rounded-3xl border-2 border-white/20 bg-white/95 backdrop-blur-xl p-10 shadow-2xl overflow-hidden">
                 <div class="mb-8 text-center">
-                    
                     <div class="flex justify-center mb-6">
                         <div class="relative h-28 w-28 flex items-center justify-center">
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 blur-xl opacity-45 animate-pulse"></div>
@@ -114,6 +113,116 @@
                 <p>© 2026 Shah Jee Courier. All rights reserved.</p>
             </div>
         </div>
+
+        <div class="hidden md:flex flex-col justify-center items-center w-full md:w-[48%] z-10 md:mr-16">
+            <div class="relative w-full rounded-3xl border-2 border-white/20 bg-white/5 backdrop-blur-md p-2 shadow-2xl overflow-hidden">
+                <div class="absolute inset-0 w-full h-full" id="ad-slider">
+                    <img src="{{ asset('images/ad1.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100" id="slide-0" alt="Courier Promo 1">
+                    <img src="{{ asset('images/ad2.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-1" alt="Courier Promo 2">
+                    <img src="{{ asset('images/ad3.jfif') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-2" alt="Courier Promo 3">
+                    <img src="{{ asset('images/ad4.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-3" alt="Courier Promo 4">
+                    <img src="{{ asset('images/ad5.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-4" alt="Courier Promo 5">
+                </div>
+            </div>
+
+            <div class="w-full mt-5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 p-5 text-white shadow-xl">
+                <h3 class="text-xl font-bold mb-1 tracking-wide" id="slide-title">Fast & Secure Delivery</h3>
+                <p class="text-sm text-white/80" id="slide-desc">Shah Jee Courier provides real-time tracking, fast delivery network, and secure logistics management.</p>
+            </div>
+
+            <div class="flex gap-2.5 mt-4">
+                <span class="h-2.5 w-8 rounded-full bg-orange-500 transition-all duration-300" id="dot-0"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-white/40 transition-all duration-300" id="dot-1"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-white/40 transition-all duration-300" id="dot-2"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-white/40 transition-all duration-300" id="dot-3"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-white/40 transition-all duration-300" id="dot-4"></span>
+            </div>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slideCount = 5;
+            let currentSlide = 0;
+
+            const slides = [
+                document.getElementById('slide-0'),
+                document.getElementById('slide-1'),
+                document.getElementById('slide-2'),
+                document.getElementById('slide-3'),
+                document.getElementById('slide-4')
+            ];
+
+            const dots = [
+                document.getElementById('dot-0'),
+                document.getElementById('dot-1'),
+                document.getElementById('dot-2'),
+                document.getElementById('dot-3'),
+                document.getElementById('dot-4')
+            ];
+
+            const titles = [
+                "Fast & Secure Delivery",
+                "Wide Reliable Network",
+                "Affordable COD Rates",
+                "Advanced Merchant Dashboard",
+                "24/7 Customer Support"
+            ];
+
+            const descriptions = [
+                "Shah Jee Courier provides real-time tracking, fast delivery network, and secure logistics management.",
+                "Delivering happiness across cities with top-notch security and verified tracking at every hub step.",
+                "Optimize your e-commerce with our automated cash on delivery service and instant payments.",
+                "Take control of your booking, tracking, pricing matrices, and payout schedules in one simple screen.",
+                "Need help anytime? Our support team stays available 24/7 to assist with your shipments."
+            ];
+
+            const titleEl = document.getElementById('slide-title');
+            const descEl = document.getElementById('slide-desc');
+
+            const changeSlide = (index) => {
+                // Remove active classes and hide previous
+                slides[currentSlide].classList.remove('opacity-100');
+                slides[currentSlide].classList.add('opacity-0');
+                dots[currentSlide].className = 'h-2.5 w-2.5 rounded-full bg-white/40 transition-all duration-300';
+
+                // Show new active
+                currentSlide = index;
+                slides[currentSlide].classList.remove('opacity-0');
+                slides[currentSlide].classList.add('opacity-100');
+                dots[currentSlide].className = 'h-2.5 w-8 rounded-full bg-orange-500 transition-all duration-300';
+
+                // Update texts with a subtle fade-out/fade-in
+                titleEl.style.opacity = 0;
+                descEl.style.opacity = 0;
+                setTimeout(() => {
+                    titleEl.innerText = titles[currentSlide];
+                    descEl.innerText = descriptions[currentSlide];
+                    titleEl.style.opacity = 1;
+                    descEl.style.opacity = 1;
+                }, 300);
+            };
+
+            // Setup automated interval
+            setInterval(() => {
+                let nextSlide = (currentSlide + 1) % slideCount;
+                changeSlide(nextSlide);
+            }, 5000);
+
+            // Add click events to dots
+            dots.forEach((dot, idx) => {
+                dot.style.cursor = 'pointer';
+                dot.addEventListener('click', () => {
+                    if (idx !== currentSlide) {
+                        changeSlide(idx);
+                    }
+                });
+            });
+
+            // Set dynamic transition for title/desc elements
+            titleEl.style.transition = 'opacity 0.3s ease-in-out';
+            descEl.style.transition = 'opacity 0.3s ease-in-out';
+        });
+    </script>
 </body>
 </html>
