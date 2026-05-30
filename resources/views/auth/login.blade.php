@@ -115,7 +115,7 @@
         </div>
 
         <div class="hidden md:flex flex-col justify-center items-center w-full md:w-[48%] z-10 md:mr-16">
-            <div class="relative w-full rounded-3xl border-2 border-white/20 bg-white/5 backdrop-blur-md p-2 shadow-2xl overflow-hidden">
+            <div class="relative w-full rounded-3xl border-2 border-white/20 bg-white/5 backdrop-blur-md p-2 shadow-2xl overflow-hidden min-h-[520px] md:min-h-[620px]">
                 <div class="absolute inset-0 w-full h-full" id="ad-slider">
                     <img src="{{ asset('images/ad1.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100" id="slide-0" alt="Courier Promo 1">
                     <img src="{{ asset('images/ad2.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-1" alt="Courier Promo 2">
