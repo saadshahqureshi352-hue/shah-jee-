@@ -1,0 +1,1 @@
+DB::table('users')-,'shipper')-, count(*) as total'))-;

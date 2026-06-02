@@ -29,7 +29,26 @@ class BookingResource extends Resource
 {
     protected static ?string $model = Booking::class;
 
+    protected static function isAdmin(): bool
+    {
+        $user = auth()->user();
+
+        return (bool) $user && ($user->role === 'admin');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        // Client portal data ko change hone se roknay ke liye admin-only create/edit/update/delete.
+        // Non-admins bookings nahi dekhay/modify karein.
+        if (! static::isAdmin()) {
+            return parent::getEloquentQuery()->whereRaw('1=0');
+        }
+
+        return parent::getEloquentQuery();
+    }
+
     protected static ?string $recordTitleAttribute = 'consignment_no';
+
 
     public static function getNavigationIcon(): ?string
     {
@@ -167,6 +186,7 @@ class BookingResource extends Resource
     {
         return $table
             ->columns([
+
                 TextColumn::make('consignment_no')
                     ->label('Consignment #')
                     ->searchable()
@@ -300,9 +320,11 @@ class BookingResource extends Resource
                     ])->render())
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false),
-                EditAction::make()->label('Edit'),
+                EditAction::make()->label('Edit')->visible(fn (Booking $record): bool => static::isAdmin()),
                 Action::make('update_status')
+                    ->visible(fn (Booking $record): bool => static::isAdmin())
                     ->label('Update Status')
+
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->form([
@@ -354,8 +376,9 @@ class BookingResource extends Resource
                             ->send();
                     }),
             ])
-            ->toolbarActions([
+                    ->toolbarActions([
                 BulkActionGroup::make([
+
                     BulkAction::make('bulk_status_update')
                         ->label('Change Status')
                         ->icon('heroicon-o-arrow-path')

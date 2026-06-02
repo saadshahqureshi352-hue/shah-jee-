@@ -27,17 +27,17 @@
             @csrf
 
             <section x-show="step === 1" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 class="mb-4 text-2xl font-bold text-slate-800">Personal Info</h2>
+                <h2 class="mb-4 text-2xl font-bold text-slate-800">Personal Information </h2>
                 <div class="grid gap-4 md:grid-cols-2">
                     <div><label class="text-sm font-semibold">Your Name *</label><input name="name" value="{{ old('name') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
                     <div><label class="text-sm font-semibold">Brand Name *</label><input name="brand_name" value="{{ old('brand_name') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
                     <div><label class="text-sm font-semibold">Father Name *</label><input name="father_name" value="{{ old('father_name') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
-                    <div><label class="text-sm font-semibold">CNIC or Passport *</label><input name="cnic_or_passport" value="{{ old('cnic_or_passport') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
+                    <div><label class="text-sm font-semibold">CNIC Number *</label><input name="cnic_or_passport" value="{{ old('cnic_or_passport') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
                     <div><label class="text-sm font-semibold">City *</label><input name="city" value="{{ old('city') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
                     <div><label class="text-sm font-semibold">Phone Number *</label><input name="phone" value="{{ old('phone') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
                     <div><label class="text-sm font-semibold">Date of Birth *</label><input type="date" name="date_of_birth" value="{{ old('date_of_birth') }}" required class="mt-1 w-full rounded-lg border px-3 py-2.5"></div>
                     <div><label class="text-sm font-semibold">Gender *</label><select name="gender" required class="mt-1 w-full rounded-lg border px-3 py-2.5"><option>Male</option><option>Female</option><option>Other</option></select></div>
-                    <div class="md:col-span-2"><label class="text-sm font-semibold">Complete Home Address *</label><textarea name="home_address" required class="mt-1 w-full rounded-lg border px-3 py-2.5">{{ old('home_address') }}</textarea></div>
+                    <div class="md:col-span-2"><label class="text-sm font-semibold">Complete Home/Shop Address *</label><textarea name="home_address" required class="mt-1 w-full rounded-lg border px-3 py-2.5">{{ old('home_address') }}</textarea></div>
                 </div>
                 <div class="mt-4 flex justify-end"><button type="button" @click="step = 2" class="rounded-lg bg-orange-500 px-6 py-2.5 font-bold text-white">Next Step</button></div>
             </section>

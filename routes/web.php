@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\SmartToolsController;
 use App\Http\Controllers\TrackingPublicController;
 use App\Http\Controllers\AdminShipperController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -57,6 +58,8 @@ Route::post('/reset-password', [OtpPasswordResetController::class, 'resetPasswor
 Route::get('/track', [TrackingPublicController::class, 'show'])->name('track.show');
 Route::get('/track/{tracking_number}', [TrackingPublicController::class, 'show'])->name('track.show.seo');
 Route::get('/track/api/{tracking_number}', [TrackingPublicController::class, 'api'])->name('track.api');
+
+// Admin auth routes now handled by Filament's built-in ->login() panel method
 
 // === BOOKING CANCEL, EDIT, EXPORT ROUTES ===
 use App\Http\Controllers\BookingCancelController;
@@ -126,6 +129,36 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/shippers/{user}', [AdminShipperController::class, 'update'])->name('shippers.update');
         Route::post('/shippers/{user}/approve', [AdminShipperController::class, 'approve'])->name('shippers.approve');
         Route::post('/shippers/{user}/reject', [AdminShipperController::class, 'reject'])->name('shippers.reject');
+    });
+
+    // ==================== ADMIN PANEL API ROUTES ====================
+    Route::prefix('api/admin')->name('api.admin.')->group(function () {
+        // Merchant actions
+        Route::post('/merchant/approve', [AdminController::class, 'approveMerchant']);
+        Route::post('/merchant/reject', [AdminController::class, 'rejectMerchant']);
+        Route::post('/merchant/suspend', [AdminController::class, 'suspendMerchant']);
+        Route::post('/merchant/plan', [AdminController::class, 'updateMerchantPlan']);
+        Route::post('/merchant/return-charge', [AdminController::class, 'saveReturnCharge']);
+
+        // Courier actions
+        Route::post('/courier/toggle', [AdminController::class, 'toggleCourier']);
+        Route::post('/courier/save-rates', [AdminController::class, 'saveCourierRates']);
+
+        // Invoice actions
+        Route::post('/invoice/generate', [AdminController::class, 'generateInvoice']);
+        Route::post('/invoice/mark-paid', [AdminController::class, 'markInvoicePaid']);
+
+        // Settlement / Payout
+        Route::post('/settlement/pay', [AdminController::class, 'payMerchant']);
+
+        // Pricing plans
+        Route::post('/pricing/save', [AdminController::class, 'savePricingPlan']);
+
+        // Notifications
+        Route::post('/notification/send', [AdminController::class, 'sendNotification']);
+
+        // Filtered orders
+        Route::get('/orders/filter', [AdminController::class, 'filterOrders']);
     });
 
     Route::get('/integrations', function () {

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->unique(['courier_integration_id', 'city_zone', 'weight_category']);
+            $table->unique(['courier_integration_id', 'city_zone', 'weight_category'], 'rate_matrix_unique');
             $table->index('courier_integration_id');
         });
     }

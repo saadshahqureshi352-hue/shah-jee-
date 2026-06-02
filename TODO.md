@@ -1,9 +1,26 @@
-# TODO (Bookins table / SQLite migrations)
+# TODO - Admin Panel ↔ Client Portal Connection
 
-- [x] Identify crash: dashboard counts `bookings` table (SQLite says no such table).
-- [x] Read booking controller and bookings migrations.
-- [x] Disable SQLite-incompatible migration SQL: `ALTER TABLE ... MODIFY COLUMN status` in `2026_05_20_120000_add_order_fields_to_bookings_table.php`.
-- [ ] Continue migration roll-forward on SQLite (remaining failures: duplicate columns due to partial/inconsistent sqlite schema).
-- [ ] Recommended: delete `database/database.sqlite` (local) then rerun `php artisan migrate --force`.
-- [ ] After schema is created, ensure `bookings` table includes `user_id` column (controller uses it).
+## Step 1
+Locate Filament Booking resource/table queries and current actions.
+- Done: Reviewed `app/Filament/Resources/BookingResource.php` and Filament booking pages.
+- Found: No scoping/auth restriction in `BookingResource::table()`; actions can edit/update any Booking record.
+
+
+## Step 2
+Enforce admin-only access or restrict bookings query for non-admin roles.
+- Done: `BookingResource::getEloquentQuery()` admin-only scoping added.
+- Done: `Edit` + `Update Status` actions visible only for admin.
+
+
+## Step 3
+Make sure Filament booking status updates only change server DB in the same way as client portal.
+- Validate status values mapping differences (pending/dispatched/delivered/returned vs picked_up etc.).
+
+## Step 4
+Add/adjust authorization policy (Filament) so non-admin users cannot edit bookings.
+
+## Step 5
+Testing
+- Test client portal booking creation appears in admin panel.
+- Test admin status update reflected in client portal.
 
