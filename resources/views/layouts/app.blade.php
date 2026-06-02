@@ -264,9 +264,9 @@
         <header class="fixed top-0 right-0 left-0 z-30 flex h-16 items-center justify-between bg-gradient-to-r from-slate-800 via-slate-700 to-teal-600 px-4 text-white shadow-2xl lg:left-64">
             <div class="flex items-center gap-3">
                 <button type="button" @click="sidebarOpen = true" class="rounded-lg bg-white/10 p-2 lg:hidden hover:bg-white/20 transition-all-300 hover:scale-110" aria-label="Open menu"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-                <h1 class="text-base font-bold sm:text-lg flex items-center gap-2">
-                    <span class="hidden sm:inline">Welcome to</span> 
-                    <span class="bg-gradient-to-r from-orange-300 to-rose-300 bg-clip-text text-transparent font-black">Shah Jee Courier</span>
+                <h1 class="text-base font-bold sm:text-xl flex items-center gap-2 tracking-wide">
+                    <span class="hidden sm:inline bg-gradient-to-r from-white/70 to-white/90 bg-clip-text text-transparent drop-shadow-md">Welcome to</span> 
+                    <span class="bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300 bg-clip-text text-transparent font-black drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3); letter-spacing: 0.5px;">Shah Jee Courier</span>
                 </h1>
             </div>
             <div class="relative flex items-center gap-4" x-data="{ 
@@ -391,11 +391,22 @@
                 {{-- User Profile Section --}}
                 <div class="flex items-center gap-3">
                     <div class="hidden text-right text-sm leading-tight sm:block">
-                        <p class="font-semibold">{{ auth()->user()->name ?? 'User' }}</p>
+                        <p class="font-semibold text-white tracking-wide">{{ auth()->user()->name ?? 'User' }}</p>
                         <p class="text-xs text-teal-100/80">{{ \Illuminate\Support\Str::before(auth()->user()->email ?? '', '@') }}</p>
                     </div>
                     <button type="button" @click="profileOpen = !profileOpen" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-300 transition-all-300 hover:scale-105">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'U') }}&background=0d9488&color=fff" alt="" class="h-10 w-10 rounded-full border-2 border-white/30 object-cover hover:border-white/60 transition-all">
+                        @php
+                            $authUser = auth()->user();
+                            $profilePhoto = $authUser->profile_photo_path ?? null;
+                            $initials = strtoupper(\Illuminate\Support\Str::substr($authUser->name ?? 'U', 0, 2));
+                        @endphp
+                        @if($profilePhoto && file_exists(public_path('storage/'.$profilePhoto)))
+                            <img src="{{ asset('storage/'.$profilePhoto) }}" alt="{{ $authUser->name }}" class="h-10 w-10 rounded-full border-2 border-white/30 object-cover hover:border-white/60 transition-all">
+                        @else
+                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white/30 text-sm font-extrabold text-white shadow-md hover:border-white/60 transition-all">
+                                {{ $initials }}
+                            </span>
+                        @endif
                         <svg class="hidden h-4 w-4 sm:block transition-transform" :class="profileOpen && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                 </div>

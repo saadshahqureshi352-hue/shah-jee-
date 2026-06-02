@@ -273,6 +273,61 @@ class AdminDashboard extends Page
             return ['name' => $c->courier_name, 'dispatched' => $dispatched, 'profit' => $profit];
         });
 
+        // ==================== OVERALL SALES DATA (Courier-wise breakdown) ====================
+        $overallSalesBase = DB::table('bookings')
+            ->leftJoin('courier_integrations', 'bookings.courier_integration_id', '=', 'courier_integrations.id');
+
+        $overallDeliveredBase = (clone $overallSalesBase)
+            ->where('bookings.status', Booking::STATUS_DELIVERED);
+
+        $overallDeliveredCount = (clone $overallDeliveredBase)->count();
+        $overallDeliveredAmount = (float) (clone $overallDeliveredBase)->sum('bookings.cod_amount');
+        $overallDeliveryCharges = (float) (clone $overallDeliveredBase)->sum('bookings.delivery_charges');
+        $overallCourierCost = (float) (clone $overallDeliveredBase)->sum('bookings.courier_cost');
+        $overallGrossProfit = $overallDeliveryCharges - $overallCourierCost;
+        $overallTax4 = round($overallDeliveredAmount * 0.04);
+        $overallNetProfit = $overallGrossProfit - round($overallTax4 / 2);
+
+        $overallCourierCounts = (clone $overallDeliveredBase)
+            ->select('courier_integrations.courier_name', DB::raw('count(*) as total'),
+                DB::raw('SUM(bookings.cod_amount) as cod_sum'),
+                DB::raw('SUM(bookings.delivery_charges) as charges_sum'),
+                DB::raw('SUM(bookings.courier_cost) as cost_sum'))
+            ->groupBy('courier_integrations.courier_name')
+            ->get()
+            ->map(function ($row) {
+                $cod = (float) ($row->cod_sum ?? 0);
+                $charges = (float) ($row->charges_sum ?? 0);
+                $cost = (float) ($row->cost_sum ?? 0);
+                $tax4 = round($cod * 0.04);
+                $courierTax2 = round($tax4 / 2);
+                $ourTax2 = $tax4 - $courierTax2;
+                $profit = $charges - $cost;
+                $netPayable = $cod - $charges - $tax4;
+                return [
+                    'name' => $row->courier_name ?? 'Unknown',
+                    'delivered' => (int) $row->total,
+                    'cod_amount' => $cod,
+                    'delivery_charges' => $charges,
+                    'courier_cost' => $cost,
+                    'tax_4percent' => $tax4,
+                    'courier_2percent' => $courierTax2,
+                    'our_2percent' => $ourTax2,
+                    'gross_profit' => $profit,
+                    'net_payable' => $netPayable,
+                ];
+            });
+
+        $overallSalesSummary = [
+            'delivered_count' => $overallDeliveredCount,
+            'delivered_amount' => $overallDeliveredAmount,
+            'delivery_charges' => $overallDeliveryCharges,
+            'courier_cost' => $overallCourierCost,
+            'gross_profit' => $overallGrossProfit,
+            'tax_4percent' => $overallTax4,
+            'net_profit' => $overallNetProfit,
+        ];
+
         // ==================== PER MERCHANT PROFIT ====================
         $merchantProfitData = User::where('role', 'merchant')
             ->where('is_approved', true)
@@ -349,6 +404,8 @@ class AdminDashboard extends Page
             'pricingPlans' => $pricingPlans,
             'taxRegister' => $taxRegister,
             'notifHistory' => $notifHistory,
+            'overallCourierCounts' => $overallCourierCounts,
+            'overallSalesSummary' => $overallSalesSummary,
             'allMerchants' => User::where('role', 'merchant')->where('is_approved', true)->get(['id', 'name', 'brand_name']),
         ];
     }

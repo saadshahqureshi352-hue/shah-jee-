@@ -735,6 +735,10 @@
 
       <div class="erp-nav-group">
         <div class="erp-nav-label">Finance</div>
+        <a class="erp-nav-item" onclick="erpNavigate('overall-sales', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Overall Sales
+        </a>
         <a class="erp-nav-item" onclick="erpNavigate('pricing', this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M8 12h8"/></svg>
           Pricing Plans
@@ -1203,6 +1207,80 @@
           </div>
         </div>
 
+        <!-- ==================== OVERALL SALES ==================== -->
+        <div class="erp-page" id="erp-page-overall-sales">
+          <div class="erp-info-bar erp-info-bar-info">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <b>Overall Sales</b> — Sabhi couriers ke delivered orders ka summary. Formula: COD − Delivery Charges − 4% Tax = Net Payable. Profit = Delivery Charges − Courier Cost.
+          </div>
+
+          <!-- Summary Cards -->
+          <div class="erp-grid erp-grid-4" style="margin-bottom:18px">
+            <div class="erp-stat">
+              <div class="erp-stat-icon" style="background:var(--erp-success-light);color:var(--erp-success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="erp-stat-label">Total Delivered Orders</div>
+              <div class="erp-stat-value" style="color:var(--erp-success)">{{ number_format($overallSalesSummary['delivered_count'] ?? 0) }}</div>
+              <div class="erp-stat-sub">All couriers combined</div>
+            </div>
+            <div class="erp-stat">
+              <div class="erp-stat-icon" style="background:var(--erp-primary-light);color:var(--erp-primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="erp-stat-label">Total COD Amount</div>
+              <div class="erp-stat-value">Rs {{ number_format($overallSalesSummary['delivered_amount'] ?? 0) }}</div>
+              <div class="erp-stat-sub">Delivered COD</div>
+            </div>
+            <div class="erp-stat">
+              <div class="erp-stat-icon" style="background:var(--erp-success-light);color:var(--erp-success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
+              <div class="erp-stat-label">Gross Profit</div>
+              <div class="erp-stat-value pos">Rs {{ number_format($overallSalesSummary['gross_profit'] ?? 0) }}</div>
+              <div class="erp-stat-sub">Charges − Cost</div>
+            </div>
+            <div class="erp-stat">
+              <div class="erp-stat-icon" style="background:var(--erp-warning-light);color:var(--erp-warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 9 6 6"/></svg></div>
+              <div class="erp-stat-label">4% Tax</div>
+              <div class="erp-stat-value">Rs {{ number_format($overallSalesSummary['tax_4percent'] ?? 0) }}</div>
+              <div class="erp-stat-sub">On delivered COD</div>
+            </div>
+          </div>
+
+          <!-- Per Courier Breakdown -->
+          <div class="erp-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/></svg> Per Courier — Delivered Orders Breakdown</div>
+          <div class="erp-card">
+            <div class="erp-card-body">
+              <table class="erp-table">
+                <thead><tr><th>Courier</th><th>Delivered</th><th>Total COD</th><th>Delivery Charges</th><th>Courier Cost</th><th>Gross Profit</th><th>4% Tax</th><th>Courier 2%</th><th>Our 2%</th><th>Net Payable</th></tr></thead>
+                <tbody>
+                  @forelse($overallCourierCounts as $oc)
+                  <tr>
+                    <td><b>{{ $oc['name'] }}</b></td>
+                    <td class="pos">{{ number_format($oc['delivered']) }}</td>
+                    <td>Rs {{ number_format($oc['cod_amount']) }}</td>
+                    <td>Rs {{ number_format($oc['delivery_charges']) }}</td>
+                    <td>Rs {{ number_format($oc['courier_cost']) }}</td>
+                    <td class="{{ $oc['gross_profit'] >= 0 ? 'pos' : 'neg' }}">Rs {{ number_format($oc['gross_profit']) }}</td>
+                    <td>Rs {{ number_format($oc['tax_4percent']) }}</td>
+                    <td>Rs {{ number_format($oc['courier_2percent']) }}</td>
+                    <td>Rs {{ number_format($oc['our_2percent']) }}</td>
+                    <td class="pos"><b>Rs {{ number_format($oc['net_payable']) }}</b></td>
+                  </tr>
+                  @empty
+                  <tr><td colspan="10" style="text-align:center;padding:28px;color:var(--erp-text-muted)">No overall sales data available</td></tr>
+                  @endforelse
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Net Profit Summary -->
+          <div class="erp-fin-widget" style="margin-top:18px">
+            <div class="erp-fin-title" style="margin-bottom:12px">Overall Sales — Net Profit Summary</div>
+            <div class="erp-fin-row"><span>Total Delivery Charges Collected</span><span>Rs {{ number_format($overallSalesSummary['delivery_charges'] ?? 0) }}</span></div>
+            <div class="erp-fin-row"><span>Total Courier Cost</span><span class="neg">− Rs {{ number_format($overallSalesSummary['courier_cost'] ?? 0) }}</span></div>
+            <div class="erp-fin-row"><span style="font-weight:700">Gross Profit</span><span class="pos">Rs {{ number_format($overallSalesSummary['gross_profit'] ?? 0) }}</span></div>
+            <div class="erp-fin-row"><span>Our 2% Tax (Remaining)</span><span class="neg">− Rs {{ number_format(round(($overallSalesSummary['tax_4percent'] ?? 0) / 2)) }}</span></div>
+            <div class="erp-fin-row"><span style="font-weight:700;color:var(--erp-primary-dark)">Net Profit</span><span class="pos" style="font-size:17px">Rs {{ number_format($overallSalesSummary['net_profit'] ?? 0) }}</span></div>
+          </div>
+        </div>
+
         <!-- ==================== PRICING PLANS ==================== -->
         <div class="erp-page" id="erp-page-pricing">
           <div class="erp-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px">
@@ -1411,7 +1489,7 @@ function erpNavigate(page, el) {
   const titles = {
     'dashboard': 'Dashboard', 'orders': 'Orders', 'cod': 'COD & Settlement',
     'invoices': 'Invoices', 'merchants': 'Merchants', 'couriers': 'Couriers',
-    'pricing': 'Pricing Plans', 'profit': 'Profit Report', 'tax': 'Tax Engine', 'notif': 'Notifications'
+    'overall-sales': 'Overall Sales', 'pricing': 'Pricing Plans', 'profit': 'Profit Report', 'tax': 'Tax Engine', 'notif': 'Notifications
   };
   document.getElementById('erpPageTitle').textContent = titles[page] || page;
 

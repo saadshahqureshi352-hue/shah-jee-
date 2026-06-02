@@ -16,30 +16,35 @@ class BookingController extends Controller
             'tagline' => 'Express delivery',
             'bg' => 'bg-emerald-500',
             'text' => 'text-emerald-600',
+            'logo' => 'images/Trax logo.png',
         ],
         'leopards' => [
             'name' => 'Leopards',
             'tagline' => 'Nation-wide coverage',
             'bg' => 'bg-yellow-400',
             'text' => 'text-yellow-700',
+            'logo' => 'images/Leopard logo.png',
         ],
         'barqraftar' => [
             'name' => 'BarqRaftar',
             'tagline' => 'Fast & reliable',
             'bg' => 'bg-amber-500',
             'text' => 'text-amber-700',
+            'logo' => 'images/Barqraftar logo.jfif',
         ],
         'mnp' => [
             'name' => 'M&P',
             'tagline' => 'Premium logistics',
             'bg' => 'bg-red-500',
             'text' => 'text-red-600',
+            'logo' => 'images/MP logo.png',
         ],
         'tcs' => [
             'name' => 'TCS',
             'tagline' => 'Courier service',
             'bg' => 'bg-rose-600',
             'text' => 'text-rose-700',
+            'logo' => 'images/Tcs logo.png',
         ],
     ];
 

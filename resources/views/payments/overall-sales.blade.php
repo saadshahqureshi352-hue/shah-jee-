@@ -35,10 +35,25 @@
 
         <div class="flex flex-wrap gap-3">
             @foreach($courierCounts as $courier)
+                @php
+                    $courierSlug = strtolower($courier['name']);
+                    $courierLogo = match($courierSlug) {
+                        'trax' => 'images/Trax logo.png',
+                        'leopards' => 'images/Leopard logo.png',
+                        'barqraftar' => 'images/Barqraftar logo.jfif',
+                        'm&p', 'mnp' => 'images/MP logo.png',
+                        'tcs' => 'images/Tcs logo.png',
+                        default => null,
+                    };
+                @endphp
                 <a href="{{ route('payments.overall-sales', array_merge($queryBase, ['courier' => $courier['name']])) }}"
                    class="flex min-w-[120px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:ring-2 {{ $courier['ring'] }} {{ request('courier') === $courier['name'] ? 'ring-2 '.$courier['ring'] : '' }}">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold text-white {{ $courier['bg'] }}">
-                        {{ Str::substr($courier['name'], 0, 2) }}
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden bg-white">
+                        @if($courierLogo)
+                            <img src="{{ asset($courierLogo) }}" alt="{{ $courier['name'] }}" class="h-8 w-8 object-contain">
+                        @else
+                            <span class="text-xs font-bold text-white {{ $courier['bg'] }} h-full w-full flex items-center justify-center">{{ Str::substr($courier['name'], 0, 2) }}</span>
+                        @endif
                     </span>
                     <span class="text-sm font-semibold text-slate-700">{{ $courier['name'] }} ({{ $courier['count'] }})</span>
                 </a>

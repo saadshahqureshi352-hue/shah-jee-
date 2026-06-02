@@ -27,14 +27,20 @@
                     <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Change courier
                 </a>
-                <h1 class="text-xl font-bold text-slate-900 lg:text-2xl">Book Packet — {{ $courier['name'] }}</h1>
+                <h1 class="text-xl font-bold text-slate-900 lg:text-2xl flex items-center gap-2">Book Packet — 
+                    <span class="inline-flex items-center gap-1.5">
+                        <img src="{{ asset($courier['logo']) }}" alt="{{ $courier['name'] }}" class="h-6 w-6 object-contain">
+                        {{ $courier['name'] }}
+                    </span>
+                </h1>
                 <p class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
                     <span class="h-1.5 w-1.5 rounded-full bg-teal-500"></span>
                     Shah Jee Courier
                 </p>
             </div>
-            <div class="hidden rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white lg:block">
-                ✦ {{ $courier['name'] }} Courier — Ready to Book
+            <div class="hidden rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white lg:flex items-center gap-2">
+                <img src="{{ asset($courier['logo']) }}" alt="{{ $courier['name'] }}" class="h-5 w-5 object-contain">
+                {{ $courier['name'] }} Courier — Ready to Book
             </div>
         </div>
 

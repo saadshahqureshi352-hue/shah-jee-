@@ -27,8 +27,8 @@
                     <li>
                         <a href="{{ route('bookings.create', ['courier' => $slug]) }}"
                            class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-orange-300 hover:shadow-md">
-                            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white {{ $courier['bg'] }}">
-                                {{ Str::substr($courier['name'], 0, 2) }}
+                            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white overflow-hidden">
+                                <img src="{{ asset($courier['logo']) }}" alt="{{ $courier['name'] }}" class="h-10 w-10 object-contain">
                             </span>
                             <div class="min-w-0 flex-1">
                                 <p class="font-semibold text-slate-800">{{ $courier['name'] }}</p>

@@ -44,12 +44,19 @@
         </div>
 
         {{-- Modal --}}
-        <div x-show="open" x-cloak @keydown.escape.window="open = false" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div x-show="open" x-cloak @keydown.escape.window="open = false" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform scale-95"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-95"
+             class="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-slate-900/60" @click="open = false"></div>
-            <div class="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div class="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl bounce-in">
                 <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                     <h2 class="text-lg font-bold text-slate-900">Add Payment for Non-COD</h2>
-                    <button type="button" @click.stop.prevent="open = false" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">&times;</button>
+                    <button type="button" @click="open = false" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all text-xl leading-none font-bold">&times;</button>
                 </div>
                 <form method="POST" action="{{ route('payments.non-cod.store') }}" enctype="multipart/form-data" class="space-y-4 p-4">
                     @csrf

@@ -27,8 +27,8 @@
                     <div class="flex justify-center mb-6">
                         <div class="relative h-28 w-28 flex items-center justify-center">
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 blur-xl opacity-45 animate-pulse"></div>
-                            <div class="relative h-24 w-24 bg-white p-2 rounded-2xl ring-4 ring-white shadow-2xl overflow-hidden flex items-center justify-center transition-transform duration-300 hover:scale-105">
-                                <img src="{{ asset('images/logo.png') }}" alt="Shah Jee Courier" class="max-h-full max-w-full h-auto w-auto object-contain">
+                            <div class="relative h-24 w-24 bg-white p-2 rounded-2xl ring-4 ring-white shadow-2xl overflow-hidden flex items-center justify-center transition-transform duration-300 hover:scale-105 animate-pulse">
+                                <img src="{{ asset('images/shah-jee-logo.png') }}" alt="Shah Jee Courier" class="max-h-full max-w-full h-auto w-auto object-contain rounded-xl">
                             </div>
                         </div>
                     </div>
@@ -115,17 +115,17 @@
         </div>
 
         <div class="hidden md:flex flex-col justify-center items-center w-full md:w-[48%] z-10 md:mr-16">
-            <div class="relative w-full rounded-3xl border-2 border-white/20 bg-white/5 backdrop-blur-md p-2 shadow-2xl overflow-hidden min-h-[520px] md:min-h-[620px]">
-                <div class="absolute inset-0 w-full h-full" id="ad-slider">
-                    <img src="{{ asset('images/ad1.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100" id="slide-0" alt="Courier Promo 1">
-                    <img src="{{ asset('images/ad2.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-1" alt="Courier Promo 2">
-                    <img src="{{ asset('images/ad3.jfif') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-2" alt="Courier Promo 3">
-                    <img src="{{ asset('images/ad4.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-3" alt="Courier Promo 4">
-                    <img src="{{ asset('images/ad5.png') }}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0" id="slide-4" alt="Courier Promo 5">
+            <div class="relative w-full rounded-3xl border-2 border-white/20 bg-white/5 backdrop-blur-md shadow-2xl overflow-hidden flex flex-col">
+                <div class="relative w-full" style="aspect-ratio: 16/9; max-height: 400px;" id="ad-slider">
+                    <img src="{{ asset('images/ad1.png') }}" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-100" id="slide-0" alt="Courier Promo 1">
+                    <img src="{{ asset('images/ad2.png') }}" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0" id="slide-1" alt="Courier Promo 2">
+                    <img src="{{ asset('images/ad3.jfif') }}" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0" id="slide-2" alt="Courier Promo 3">
+                    <img src="{{ asset('images/ad4.png') }}" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0" id="slide-3" alt="Courier Promo 4">
+                    <img src="{{ asset('images/ad5.png') }}" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0" id="slide-4" alt="Courier Promo 5">
                 </div>
             </div>
 
-            <div class="w-full mt-5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 p-5 text-white shadow-xl">
+            <div class="w-full mt-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 p-5 text-white shadow-xl">
                 <h3 class="text-xl font-bold mb-1 tracking-wide" id="slide-title">Fast & Secure Delivery</h3>
                 <p class="text-sm text-white/80" id="slide-desc">Shah Jee Courier provides real-time tracking, fast delivery network, and secure logistics management.</p>
             </div>
