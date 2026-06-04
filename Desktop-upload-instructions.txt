@@ -1,0 +1,26 @@
+Desktop par folder bananay ka exact tareeqa:
+
+1) Desktop par naya folder banayein:
+   shah-jee-courier/
+
+2) Is shah-jee-courier/ folder ke andar ye folders/files upload/put karein:
+   - public/
+   - app/
+   - bootstrap/
+   - config/
+   - database/
+   - routes/
+   - resources/
+   - storage/
+   - vendor/
+   - artisan
+   - composer.json
+   - composer.lock
+
+3) Free hosting panel me:
+   - Document Root/Web Root = shah-jee-courier/public
+
+4) .env:
+   - hosting control panel me settings set karein (APP_KEY/DB/APP_URL). 
+   - upload me .env ko le kar risk hota hai, is liye best hai panel me environment values set karein.
+
