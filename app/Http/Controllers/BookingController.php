@@ -115,11 +115,12 @@ class BookingController extends Controller
     {
         $slug = $request->query('courier');
 
-        if (! $slug || ! isset(self::COURIERS[$slug])) {
-            return view('bookings.select-courier', [
-                'couriers' => self::COURIERS,
-            ]);
-        }
+if (! $slug || ! $this->isValidCourierSlug($slug)) {
+    $couriers = $this->getActiveCouriers();
+    return view('bookings.select-courier', [
+        'couriers' => $couriers,
+    ]);
+}
 
         $courier = array_merge(self::COURIERS[$slug], [
             'slug' => $slug,
@@ -138,13 +139,18 @@ class BookingController extends Controller
             ->values()
             ->all();
 
-        return view('bookings.form', compact('courier', 'pickupAddresses', 'cities'));
+        $pricingPlan = auth()->user()?->pricingPlan;
+        return view('bookings.form', compact('courier', 'pickupAddresses', 'cities', 'pricingPlan'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'courier_slug' => 'required|string',
+public function store(Request $request)
+{
+    $request->validate([
+        'courier_slug' => ['required', 'string', function($attribute, $value, $fail) {
+            if (! $this->isValidCourierSlug($value)) {
+                $fail('Invalid courier selected.');
+            }
+        }],
             'destination_city' => 'required|string|max:100',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
@@ -251,21 +257,44 @@ class BookingController extends Controller
 
     public static function calculateDeliveryCharges(float $weight, string $serviceType, string $courierSlug): float
     {
-        $base = match ($courierSlug) {
-            'tcs', 'mnp' => 200,
-            'leopards' => 180,
-            default => 160,
+        // Booking form sends weight numeric; slabs require grams.
+        // Treat $weight as KG and convert to grams for bracket-accurate math.
+        $weightKg = max(0, (float) $weight);
+        $weightInGrams = $weightKg * 1000;
+
+        $merchant = auth()->user();
+        $pricingPlan = $merchant?->pricingPlan;
+
+        $baseRate = match ($serviceType) {
+            'Overnight' => (float) ($pricingPlan?->overnight_base_rate ?? 0),
+            'Detain' => (float) ($pricingPlan?->detain_base_rate ?? 0),
+            'Overland' => (float) ($pricingPlan?->overland_base_rate ?? 0),
+            default => (float) ($pricingPlan?->overnight_base_rate ?? 0),
         };
 
-        $perKg = 55;
-        $multiplier = match ($serviceType) {
-            'Overnight' => 1.25,
-            'Detain' => 1.0,
-            'Overland' => 0.9,
-            default => 1.0,
+        $additionalRate = match ($serviceType) {
+            'Overnight' => (float) ($pricingPlan?->overnight_additional_rate ?? 0),
+            'Detain' => (float) ($pricingPlan?->detain_additional_rate ?? 0),
+            'Overland' => (float) ($pricingPlan?->overland_additional_rate ?? 0),
+            default => (float) ($pricingPlan?->overnight_additional_rate ?? 0),
         };
 
-        return round(($base + ($weight * $perKg)) * $multiplier);
+        $totalDeliveryCharges = 0;
+
+        if ($weightInGrams >= 1 && $weightInGrams <= 1000) {
+            $totalDeliveryCharges = $baseRate;
+        } elseif ($weightInGrams >= 1001 && $weightInGrams <= 1999) {
+            $totalDeliveryCharges = $baseRate + $additionalRate;
+        } elseif ($weightInGrams >= 2000 && $weightInGrams <= 2999) {
+            $totalDeliveryCharges = $baseRate * 2;
+        } elseif ($weightInGrams == 3000) {
+            $totalDeliveryCharges = $baseRate * 3;
+        } else {
+            // Safe fallback for weights scaling beyond 3000g based on the established sequence
+            $totalDeliveryCharges = (floor($weightInGrams / 1000) * $baseRate);
+        }
+
+        return round($totalDeliveryCharges);
     }
 
     private function bookingResponse(Request $request, bool $success, array $data = [], array $errors = [])
@@ -285,21 +314,61 @@ class BookingController extends Controller
         return redirect()->route('bookings')->with('success', 'Packet booked successfully.');
     }
 
-    private function resolveCourierIntegrationId(string $name): int
-    {
-        $row = DB::table('courier_integrations')->where('courier_name', $name)->first();
+private function resolveCourierIntegrationId(string $name): int
+{
+    $row = DB::table('courier_integrations')->where('courier_name', $name)->first();
 
-        if ($row) {
-            return (int) $row->id;
-        }
-
-        return (int) DB::table('courier_integrations')->insertGetId([
-            'courier_name' => $name,
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    if ($row) {
+        return (int) $row->id;
     }
+
+    return (int) DB::table('courier_integrations')->insertGetId([
+        'courier_name' => $name,
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+}
+
+/**
+ * Get active couriers from the database and format them for the booking flow.
+ *
+ * @return array
+ */
+protected function getActiveCouriers(): array
+{
+    $couriers = DB::table('courier_integrations')
+        ->where('is_active', true)
+        ->get()
+        ->map(function ($c) {
+            $slug = strtolower(str_replace(' ', '-', $c->courier_name));
+            return [
+                'name' => $c->courier_name,
+                'tagline' => '',
+                'bg' => 'bg-gray-200',
+                'text' => 'text-gray-800',
+                'logo' => '',
+                'slug' => $slug,
+                'integration_id' => $c->id,
+            ];
+        })
+        ->keyBy('slug')
+        ->toArray();
+
+    // Merge with the predefined static couriers to keep existing ones
+    return array_merge(self::COURIERS, $couriers);
+}
+
+/**
+ * Validate if a courier slug exists in either the static list or the database.
+ *
+ * @param string $slug
+ * @return bool
+ */
+protected function isValidCourierSlug(string $slug): bool
+{
+    return array_key_exists($slug, self::COURIERS) || array_key_exists($slug, $this->getActiveCouriers());
+}
 
     // =========================================================================
     // === LOAD SHEET SYSTEM METHODS ===

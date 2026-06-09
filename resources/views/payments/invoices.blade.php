@@ -1,5 +1,15 @@
 @php
-    $fmt = fn ($n) => 'Rs. '.number_format((float) $n);
+    $fmt = fn ($n) => 'Rs. '.number_format((float) $n, 2);
+@endphp
+
+@php
+    $badgeStyle = function (string $status): string {
+        return match ($status) {
+            'paid' => 'bg-emerald-100 text-emerald-800',
+            'pending' => 'bg-orange-100 text-orange-800',
+            default => 'bg-rose-100 text-rose-800',
+        };
+    };
 @endphp
 
 <x-app-layout>

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Affiliate;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -21,7 +22,9 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Admin User',
             'email' => 'shahjeecourier@gmail.com',
-            'password' => Hash::make('11223344'),
+            'password' => Hash::make('shahjee'),
         ]);
+
+        $this->call(AffiliateSeeder::class);
     }
 }

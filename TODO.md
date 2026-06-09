@@ -1,81 +1,36 @@
-# Admin Panel Comprehensive Overhaul - Todo List
+# Shah Jee Courier — Implementation TODO
 
-## Phase 1: Backend Data Layer (AdminDashboard.php)
-- [x] Already has most data structures in getViewData()
-- [ ] Update Company Live Position: Total COD (all statuses)
-- [ ] Fix Merchant Payables: Total COD - (Delivery Charges + 4% Tax)
-- [ ] Fix Courier Receivable: Total COD Sent - (Courier Fees + 2% Tax)
-- [ ] Fix Available Cash: Merchant Delivery Charges - Courier Delivery Charges (no tax)
-- [ ] Add Total Returned count
-- [ ] Add Ready to Return / Return Confirmed proper tracking
-- [ ] Update Gross Profit: on dispatched orders (Merchant Rate - Courier Rate)
-- [ ] Update Net Profit: on delivered orders (actual profit after courier paid)
-- [ ] Add date_to_date period filter
-- [ ] Add calendar/date range to backend
+## Finance + Invoices (Daily Cycle)
+- [ ] Update/extend DB schema for daily invoices (11:59pm), overdue logic, and delivered_at linkage.
+- [ ] Add courier settlement ledger (2% courier tax + courier receivable/remittance).
+- [ ] Add consolidated tax holding + profit fields needed for dashboard.
+- [ ] Replace existing weekly/3-day SellerInvoiceSyncService with daily scheduler job + manual Generate Invoice endpoint.
+- [ ] Implement Delivered-only finance calculations:
+  - [ ] Merchant tax (4% of COD)
+  - [ ] Courier tax (2% of COD)
+  - [ ] Company profit without tax (delivery margin + our 2% tax margin)
+  - [ ] Gross profit on dispatched orders (merchant_rate - courier_rate)
+- [ ] Same-city auto-detection and correct rate application on booking hook.
 
-## Phase 2: Dashboard View (admin-dashboard.blade.php)
-- [ ] Complete rewrite with all new sections
-- [ ] Add ready_to_return and return_confirmed filter buttons
-- [ ] Add search box for orders
-- [ ] Add calendar box for date filtering
-- [ ] Add Total Returned card
-- [ ] Fix financial formulas display
+## Courier ON/OFF
+- [ ] Ensure courier ON/OFF impacts client portal booking availability (backend validation too).
 
-## Phase 3: Orders Section Overhaul
-- [ ] Add Ready to Return / Return Confirmed filter buttons
-- [ ] Add search box (by name/tracking number)
-- [ ] Add calendar date picker
-- [ ] Fix filtered data loading
+## Filament Dashboard + Orders Filters
+- [ ] Implement dashboard widgets:
+  - [ ] Date filters: Today, Yesterday, 3 Days, This Week, This Month, Date-to-Date
+  - [ ] Top cards: Live Balance, Merchant Payables, Courier Receivable, Tax Held (4%), Available Cash (Profit without tax), Book Today, Dispatched, Delivered, In Progress, Issue, Ready to Return, Return Confirmed, Total Returned, Gross Profit, Net Profit.
+- [ ] Orders sidebar:
+  - [ ] Tabs for statuses + global search by name/tracking + calendar/day filter
+  - [ ] Correct mapping to “In Progress / Issue / Ready to Return / Return Confirmed / Returned” rules
+- [ ] Return workflow states UI + backend state transitions.
 
-## Phase 4: COD Settlement Section
-- [ ] Fix Total COD to Pay formula
-- [ ] Fix Courier Receivable formula  
-- [ ] Add per-merchant edit functionality
-- [ ] Add status dropdown (pending/paid/unpaid)
-- [ ] Add calendar box
+## Settlements UI
+- [ ] COD Settlement tables:
+  - [ ] Total COD to Pay, Net payable, courier receivable, pending settlements, per-merchant settlement, edit/save with recompute.
+- [ ] Courier COD Received breakdown:
+  - [ ] courier-wise delivery charges & courier tax (2%) deducted, remitted amount, courier status active/off.
 
-## Phase 5: Invoice Management
-- [ ] Convert from 3-day to Daily Invoice system
-- [ ] Add auto-scheduler logic (evening batch)
-- [ ] Add manual Generate Invoice button
-- [ ] Add View orders in invoice
-- [ ] Add Edit invoice functionality
-- [ ] Add Pay / Mark as Paid button
-- [ ] Add Today Pay aggregation button
-
-## Phase 6: Merchants Section
-- [ ] Pending approval with Approve/Reject
-- [ ] Active merchants financial summary
-- [ ] Custom return charges per merchant
-- [ ] Plan change dropdown
-- [ ] Search box (name/phone)
-- [ ] Calendar date filter
-
-## Phase 7: Couriers Section
-- [ ] Courier rate management with profit display
-- [ ] ON/OFF toggle
-- [ ] Add courier button
-- [ ] Display logo
-- [ ] Gross profit (dispatched) vs Net profit (delivered)
-
-## Phase 8: Pricing Plans
-- [ ] Convert to Basic, Standard, VIP
-- [ ] Editable rates: Different City, Same City, Additional KG, Return
-- [ ] Merchant count per plan
-- [ ] Plan switching for merchants
-- [ ] Filter tabs: All, Basic, Standard, VIP
-
-## Phase 9: Overall Sales
-- [ ] Per courier breakdown
-- [ ] Total Delivered, Total COD, Gross Profit, 4% Tax
-- [ ] Net Profit Summary
-- [ ] Courier 2% and Our 2% tax breakdown
-
-## Phase 10: JavaScript / AJAX Integration
-- [ ] All filter callbacks
-- [ ] Merchant approve/reject
-- [ ] Courier toggle/save
-- [ ] Invoice generate/mark-paid
-- [ ] Plan saving
-- [ ] Search functionality
-- [ ] Calendar/date picker
+## Completion / Validation
+- [ ] Migrate DB + run unit checks
+- [ ] Validate scheduler: deliver orders → invoice auto-generated daily → statuses pending/paid/overdue
+- [ ] Verify dashboard counters match settlement totals

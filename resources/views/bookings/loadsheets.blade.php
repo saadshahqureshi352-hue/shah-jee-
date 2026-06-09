@@ -228,7 +228,7 @@
         </div>
 
         {{-- FILTERS BAR - Light Cyan Theme --}}
-        <div class="fade-in-up-delay-1 rounded-xl border border-cyan-200 bg-gradient-to-r from-cyan-50 to-teal-50 p-4 shadow-sm flex flex-col md:flex-row gap-3 card-hover items-center">
+        <div class="fade-in-up-delay-1 relative z-50 rounded-xl border border-cyan-200 bg-gradient-to-r from-cyan-50 to-teal-50 p-4 shadow-sm flex flex-col md:flex-row gap-3 card-hover items-center">
             <div class="relative shrink-0">
                 <button @click="dateFilterOpen = !dateFilterOpen" type="button"
                         class="flex items-center gap-2.5 rounded-lg border border-cyan-200 bg-white px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:border-cyan-400 transition-all-300 shadow-sm">
@@ -237,7 +237,7 @@
                     <svg class="h-4 w-4 text-slate-400 transition-all-300" :class="dateFilterOpen && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <div x-show="dateFilterOpen" @click.outside="dateFilterOpen = false" x-cloak
-                     class="absolute left-0 top-full z-40 mt-1.5 w-56 rounded-xl border border-cyan-200 bg-white py-1.5 shadow-xl nav-slide">
+                     class="absolute left-0 top-full z-100 mt-1.5 w-56 rounded-xl border border-cyan-200 bg-white py-1.5 shadow-xl nav-slide">
                     <template x-for="(label, key) in dateFilterLabels">
                         <button type="button" @click="dateFilterRange = key; dateFilterOpen = false" x-text="label"
                                 class="flex w-full items-center px-4 py-2 text-left text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-700"

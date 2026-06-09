@@ -6,6 +6,7 @@
     <div class="space-y-4 p-4 sm:p-6" x-data="nonCodDeposit({
         bank: @json($bank),
         wallets: @json($walletJson),
+        open: false,
     })">
         @if(session('success'))
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('success') }}</div>
@@ -52,11 +53,11 @@
              x-transition:leave-start="opacity-100 transform scale-100"
              x-transition:leave-end="opacity-0 transform scale-95"
              class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-slate-900/60" @click="open = false"></div>
-            <div class="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl bounce-in">
+            <div class="absolute inset-0 z-0 bg-slate-900/60" @click="open = false"></div>
+            <div class="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl bounce-in">
                 <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                     <h2 class="text-lg font-bold text-slate-900">Add Payment for Non-COD</h2>
-                    <button type="button" @click="open = false" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all text-xl leading-none font-bold">&times;</button>
+                    <button type="button" @click.stop="open = false" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all text-xl leading-none font-bold">&times;</button>
                 </div>
                 <form method="POST" action="{{ route('payments.non-cod.store') }}" enctype="multipart/form-data" class="space-y-4 p-4">
                     @csrf

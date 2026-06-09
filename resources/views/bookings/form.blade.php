@@ -91,11 +91,43 @@
                 get selectedPickup() {
                     return this.pickups.find(p => String(p.id) === String(this.pickupId)) || null;
                 },
+                // Pricing plan rates (merchant tier): fetched dynamically from DB
+                overnightBase: @json($pricingPlan?->overnight_base_rate ?? 0),
+                overnightAdditional: @json($pricingPlan?->overnight_additional_rate ?? 0),
+                detainBase: @json($pricingPlan?->detain_base_rate ?? 0),
+                detainAdditional: @json($pricingPlan?->detain_additional_rate ?? 0),
+                overlandBase: @json($pricingPlan?->overland_base_rate ?? 0),
+                overlandAdditional: @json($pricingPlan?->overland_additional_rate ?? 0),
+
                 get deliveryCharges() {
-                    const base = { tcs: 200, mnp: 200, leopards: 180 }[this.courierSlug] ?? 160;
-                    const perKg = 55;
-                    const mult = { Overnight: 1.25, Detain: 1.0, Overland: 0.9 }[this.serviceType] ?? 1;
-                    return Math.round((base + (parseFloat(this.weight) || 0) * perKg) * mult);
+                    const weightG = parseFloat(this.weight) || 0;
+
+                    const ratesByService = {
+                        Overnight: { base: parseFloat(this.overnightBase) || 0, additional: parseFloat(this.overnightAdditional) || 0 },
+                        Detain: { base: parseFloat(this.detainBase) || 0, additional: parseFloat(this.detainAdditional) || 0 },
+                        Overland: { base: parseFloat(this.overlandBase) || 0, additional: parseFloat(this.overlandAdditional) || 0 },
+                    };
+
+                    const rates = ratesByService[this.serviceType] ?? { base: 0, additional: 0 };
+                    const baseRate = rates.base;
+                    const additionalRate = rates.additional;
+
+                    let totalDeliveryCharges = 0;
+
+                    if (weightG >= 1 && weightG <= 1000) {
+                        totalDeliveryCharges = baseRate;
+                    } else if (weightG >= 1001 && weightG <= 1999) {
+                        totalDeliveryCharges = baseRate + additionalRate;
+                    } else if (weightG >= 2000 && weightG <= 2999) {
+                        totalDeliveryCharges = baseRate * 2;
+                    } else if (weightG === 3000) {
+                        totalDeliveryCharges = baseRate * 3;
+                    } else {
+                        // Safe fallback for weights scaling beyond 3000g based on the established sequence
+                        totalDeliveryCharges = (Math.floor(weightG / 1000) * baseRate);
+                    }
+
+                    return Math.round(totalDeliveryCharges);
                 },
                 selectCity(city) {
                     this.destination = city;

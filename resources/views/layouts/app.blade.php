@@ -251,12 +251,7 @@
                 <a href="{{ route('smart-tools.alert-templates') }}" class="{{ request()->routeIs('smart-tools.alert-templates') ? $subLinkActive : $subLink }}">Alert Templates Settings</a>
             </div>
 
-            @if($isAdmin)
-                <a href="{{ route('admin.shippers.index') }}" class="{{ request()->routeIs('admin.shippers.*') ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} {{ $topLink }} mt-1">
-                    <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Admin Approvals
-                </a>
-            @endif
+
         </nav>
     </aside>
 
@@ -429,7 +424,7 @@
             </div>
         </header>
 
-        <main class="min-h-screen pt-16 bg-gradient-to-br from-slate-50 via-white to-teal-50">
+        <main class="h-screen overflow-y-auto pt-16 pb-16 bg-gradient-to-br from-slate-50 via-white to-teal-50">
             @if(session('success'))
                 <div class="mx-4 mt-4 rounded-xl border-l-4 border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 px-5 py-4 text-sm font-semibold text-emerald-800 shadow-lg sm:mx-6 bounce-in flex items-center gap-3">
                     <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -437,6 +432,8 @@
                 </div>
             @endif
             {{ $slot }}
+
+            <div class="h-20 w-full clear-both"></div>
         </main>
     </div>
 </body>

@@ -1601,6 +1601,72 @@ function erpApplyMerchantFilter() {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   erpCalcTax();
+  // Live refresh dashboard cards (company position + operational + financial)
+  // Uses AdminController@getDashboardData API.
+  try {
+    const refreshMs = 30000; // 30 seconds
+    const csrf = '{{ csrf_token() }}';
+    const applyDashboardData = (d) => {
+      if (!d || !d.success) return;
+      const oc = d.operationalCards || {};
+      const fc = d.financialCards || {};
+      const cp = d.companyPosition || {};
+
+      // Company position
+      const totalCodEl = document.querySelector('#erp-page-dashboard .erp-fin-row:nth-child(2) span:last-child');
+      const merchantPayEl = document.querySelector('#erp-page-dashboard .erp-fin-row:nth-child(3) span:last-child');
+      const courierRecEl = document.querySelector('#erp-page-dashboard .erp-fin-row:nth-child(4) span:last-child');
+      const taxHeldEl = document.querySelector('#erp-page-dashboard .erp-fin-row:nth-child(5) span:last-child');
+      const availableCashMain = document.querySelector('#erp-page-dashboard .erp-fin-main');
+      if (totalCodEl) totalCodEl.textContent = 'Rs ' + Number(cp.totalCodAll || 0).toLocaleString();
+      if (merchantPayEl) merchantPayEl.textContent = '− Rs ' + Number(cp.merchantPayables || 0).toLocaleString();
+      if (courierRecEl) courierRecEl.textContent = '+ Rs ' + Number(cp.courierReceivables || 0).toLocaleString();
+      if (taxHeldEl) taxHeldEl.textContent = '− Rs ' + Number(cp.taxHeld || 0).toLocaleString();
+      if (availableCashMain) availableCashMain.textContent = 'Rs ' + Number(cp.availableCash || 0).toLocaleString();
+
+      // Operational cards
+      const setCardValue = (id, value, prefix) => {
+        const el = document.querySelector('#' + id + ' .erp-stat-value');
+        if (el) el.textContent = (prefix || '') + Number(value || 0).toLocaleString();
+      };
+
+      // These ids must exist; otherwise skip.
+      setCardValue('erp-card-bookedToday', oc.bookedToday || 0);
+      setCardValue('erp-card-bookedTodayCod', oc.bookedTodayCod || 0, '');
+
+      setCardValue('erp-card-dispatched', oc.dispatched || 0);
+      setCardValue('erp-card-delivered', oc.delivered || 0);
+      setCardValue('erp-card-inProgress', oc.inProgress || 0);
+      setCardValue('erp-card-issueOrders', oc.issueOrders || 0);
+      setCardValue('erp-card-readyToReturn', oc.readyToReturn || 0);
+      setCardValue('erp-card-returnConfirmed', oc.returnConfirmed || 0);
+      setCardValue('erp-card-totalReturned', oc.totalReturned || 0);
+
+      // Financial cards
+      // (Only update key visible numbers safely; avoid complex selectors)
+      // We'll update tax & available cash which are reliable in the template.
+      const tax4Inline = document.querySelector('#erp-page-dashboard .erp-fin-row:nth-child(5) span:last-child');
+      if (tax4Inline) tax4Inline.textContent = '− Rs ' + Number(cp.taxHeld || 0).toLocaleString();
+    };
+
+
+    const fetchAndApply = async () => {
+      // Respect current filters from URL (period/from/to)
+      const params = new URLSearchParams(window.location.search);
+      const qs = params.toString();
+      const url = '/api/admin/dashboard/data' + (qs ? '?' + qs : '');
+      const res = await fetch(url, { headers: { 'X-CSRF-TOKEN': csrf } });
+      const d = await res.json();
+      applyDashboardData(d);
+    };
+
+    // First refresh after load
+    setTimeout(fetchAndApply, refreshMs);
+    setInterval(fetchAndApply, refreshMs);
+  } catch (e) {
+    console.warn('Dashboard live refresh disabled:', e);
+  }
+
   // Handle hash-based navigation
   const hash = window.location.hash.replace('#', '');
   if (hash && ['dashboard','orders','cod','invoices','merchants','couriers','overall-sales','pricing','profit','tax','notif'].includes(hash)) {

@@ -380,6 +380,16 @@ class AdminController extends Controller
             if ($request->has('additional_kg_rate')) $updateData['additional_kg_rate'] = $request->additional_kg_rate;
             if ($request->has('base_delivery_charge')) $updateData['base_delivery_charge'] = $request->base_delivery_charge;
 
+            // Service-type specific rates
+            if ($request->has('overnight_base_rate')) $updateData['overnight_base_rate'] = $request->overnight_base_rate;
+            if ($request->has('overnight_additional_rate')) $updateData['overnight_additional_rate'] = $request->overnight_additional_rate;
+
+            if ($request->has('detain_base_rate')) $updateData['detain_base_rate'] = $request->detain_base_rate;
+            if ($request->has('detain_additional_rate')) $updateData['detain_additional_rate'] = $request->detain_additional_rate;
+
+            if ($request->has('overland_base_rate')) $updateData['overland_base_rate'] = $request->overland_base_rate;
+            if ($request->has('overland_additional_rate')) $updateData['overland_additional_rate'] = $request->overland_additional_rate;
+
             if (!empty($updateData)) {
                 $plan->update($updateData);
             }

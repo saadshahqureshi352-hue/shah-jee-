@@ -10,13 +10,11 @@ return new class extends Migration
     {
         Schema::create('pricing_plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g., VIP, Standard, Premium
-            $table->text('description')->nullable();
-            $table->decimal('base_delivery_charge', 10, 2)->default(0);
-            $table->decimal('cod_commission_percent', 5, 2)->default(0);
-            $table->decimal('weight_charge_per_kg', 10, 2)->default(0);
-            $table->decimal('fuel_surcharge_percent', 5, 2)->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->string('name'); // Basic, Standard, VIP
+            $table->decimal('diff_city_rate', 10, 2);
+            $table->decimal('same_city_rate', 10, 2);
+            $table->decimal('additional_kg_rate', 10, 2);
+            $table->decimal('return_rate', 10, 2);
             $table->timestamps();
         });
     }
